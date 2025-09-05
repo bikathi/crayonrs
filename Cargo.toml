@@ -1,7 +1,18 @@
 [package]
 name = "crayonrs"
 version = "0.1.0"
+description = "A Rust library to help convert between different color types"
 edition = "2024"
+license = "MIT"
+repository = "https://github.com/bikathi/crayonrs.git"
+categories = ["graphics"]
+authors = ["Bikathi Martin", "bikathimartin@outlook.com"]
+keywords = ["utility", "color", "converters", "convert"]
+
 
 [dependencies]
 thiserror = "2.0.16"
+
+[lib]
+name = "crayonrs"
+path = "src/lib.rs"
