@@ -1,4 +1,4 @@
-use crate::util::{Color, ConversionError, Convert};
+use crate::util::{Color, ConversionError, IntoColor, MAX_FOR_RGB_COLOR_SPACE};
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Rgb {
@@ -18,6 +18,8 @@ impl Rgb {
 }
 
 impl Color for Rgb {
+    type Input = Self;
+
     fn from_rgb(rgb: Rgb) -> Result<Self, ConversionError> {
         Ok(rgb)
     }
@@ -27,4 +29,4 @@ impl Color for Rgb {
     }
 }
 
-impl Convert for Rgb {}
+impl IntoColor for Rgb {}

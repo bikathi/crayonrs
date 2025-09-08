@@ -1,5 +1,3 @@
-use std::io::Error;
-
 use crate::color_types::rgb_color::Rgb;
 use thiserror::Error;
 
@@ -12,7 +10,14 @@ pub enum ConversionError {
 // we are using the hub-and-spoke pattern to handle color conversions
 // for example, to convert from hs(var) to hex, we do hs(var) -> rgb -> hex
 // therefore, all supported color types must implement this trait
-pub trait Color: Clone + Copy + PartialEq {
+pub trait Color: Clone + PartialEq {
+    type Input;
+
+    /// Before conversion, check that `input` is valid
+    fn pre_check(input: &Self::Input) -> bool {
+        true
+    }
+
     /// Convert this color to RGB as an intermediate format
     fn to_rgb(&self) -> Result<Rgb, ConversionError>;
 
@@ -20,7 +25,7 @@ pub trait Color: Clone + Copy + PartialEq {
     fn from_rgb(rgb: Rgb) -> Result<Self, ConversionError>;
 }
 
-pub trait Convert: Color {
+pub trait IntoColor: Color {
     fn into_color<T: Color>(self) -> Result<T, ConversionError> {
         into_color(self)
     }
@@ -30,3 +35,7 @@ pub trait Convert: Color {
 fn into_color<From: Color, To: Color>(from: From) -> Result<To, ConversionError> {
     To::from_rgb(from.to_rgb().unwrap())
 }
+
+// the list of hexadecimal characters
+pub const HEX_CHAR_TABLE: &[u8; 16] = b"0123456789ABCDEF";
+pub const MAX_FOR_RGB_COLOR_SPACE: u8 = 255u8;
