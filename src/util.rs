@@ -5,6 +5,9 @@ use thiserror::Error;
 pub enum ConversionError {
     #[error("input may be invalid!")]
     InvalidInput,
+
+    #[error("failed to convert from hex")]
+    HexTableIndexingError,
 }
 
 // we are using the hub-and-spoke pattern to handle color conversions
@@ -14,7 +17,7 @@ pub trait Color: Clone + PartialEq {
     type Input;
 
     /// Before conversion, check that `input` is valid
-    fn pre_check(input: &Self::Input) -> bool {
+    fn pre_check(&self) -> bool {
         true
     }
 
@@ -39,3 +42,18 @@ fn into_color<From: Color, To: Color>(from: From) -> Result<To, ConversionError>
 // the list of hexadecimal characters
 pub const HEX_CHAR_TABLE: &[u8; 16] = b"0123456789ABCDEF";
 pub const MAX_FOR_RGB_COLOR_SPACE: u8 = 255u8;
+
+pub fn index_of_char(character: char) -> Result<usize, ConversionError> {
+    if character == '#' {
+        return Err(ConversionError::HexTableIndexingError);
+    }
+
+    // Linear search -> as array isn't that large
+    for (index, &table_char) in HEX_CHAR_TABLE.iter().enumerate() {
+        if table_char == character as u8 {
+            return Ok(index);
+        }
+    }
+
+    Err(ConversionError::HexTableIndexingError)
+}

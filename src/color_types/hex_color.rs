@@ -1,6 +1,6 @@
 use crate::{
     color_types::rgb_color::Rgb,
-    util::{Color, ConversionError, HEX_CHAR_TABLE, IntoColor},
+    util::{Color, ConversionError, HEX_CHAR_TABLE, IntoColor, index_of_char},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -9,8 +9,17 @@ pub struct Hex {
 }
 
 impl Hex {
-    fn new(hex_string: String) -> Self {
+    pub fn new(hex_string: String) -> Self {
         Self { value: hex_string }
+    }
+
+    pub fn hex_pair_to_u8(s: &str) -> Result<u8, ConversionError> {
+        let op_result = u8::from_str_radix(s, 16);
+        if op_result.is_err() {
+            return Err(ConversionError::HexTableIndexingError);
+        }
+
+        Ok(op_result.unwrap())
     }
 }
 
@@ -23,8 +32,8 @@ fn division_by_16(input: &u8) -> (u8, u8) {
 impl Color for Hex {
     type Input = Self;
 
-    fn pre_check(input: &Self::Input) -> bool {
-        if !input.value.starts_with("#") || &input.value[1..].len() < &6 {
+    fn pre_check(&self) -> bool {
+        if !self.value.starts_with("#") || self.value[1..].len() < 6 {
             return false;
         }
 
@@ -47,7 +56,14 @@ impl Color for Hex {
     }
 
     fn to_rgb(&self) -> Result<Rgb, crate::util::ConversionError> {
-        todo!()
+        if Hex::pre_check(self) {
+            let first_pair = u8::from_str_radix(&self.value[1..=2], 16).unwrap();
+            let second_pair = u8::from_str_radix(&self.value[3..=4], 16).unwrap();
+            let third_pair = u8::from_str_radix(&self.value[5..=6], 16).unwrap();
+            return Ok(Rgb::new(first_pair, second_pair, third_pair));
+        }
+
+        Err(ConversionError::InvalidInput)
     }
 }
 
