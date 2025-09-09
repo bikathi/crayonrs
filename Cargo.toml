@@ -1,6 +1,6 @@
 [package]
 name = "crayonrs"
-version = "0.1.0"
+version = "0.1.1"
 description = "A Rust library to help convert between different color types"
 edition = "2024"
 license = "MIT"
