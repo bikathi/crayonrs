@@ -1,6 +1,8 @@
+use std::{range::RangeInclusive};
+
 use crate::{
     color_types::rgb_color::Rgb,
-    util::{Color, ConversionError, HEX_CHAR_TABLE, IntoColor, index_of_char},
+    util::{Color, ConversionError, HEX_CHAR_TABLE, IntoColor},
 };
 
 #[derive(Debug, Clone, PartialEq)]
@@ -13,8 +15,8 @@ impl Hex {
         Self { value: hex_string }
     }
 
-    pub fn hex_pair_to_u8(s: &str) -> Result<u8, ConversionError> {
-        let op_result = u8::from_str_radix(s, 16);
+    pub fn hex_pair_to_u8(&self, start: usize, end: usize) -> Result<u8, ConversionError> {
+        let op_result = u8::from_str_radix(&self.value[RangeInclusive::from(start..=end)], 16);
         if op_result.is_err() {
             return Err(ConversionError::HexTableIndexingError);
         }
@@ -57,10 +59,11 @@ impl Color for Hex {
 
     fn to_rgb(&self) -> Result<Rgb, crate::util::ConversionError> {
         if Hex::pre_check(self) {
-            let first_pair = u8::from_str_radix(&self.value[1..=2], 16).unwrap();
-            let second_pair = u8::from_str_radix(&self.value[3..=4], 16).unwrap();
-            let third_pair = u8::from_str_radix(&self.value[5..=6], 16).unwrap();
-            return Ok(Rgb::new(first_pair, second_pair, third_pair));
+            return Ok(Rgb::new(
+                self.hex_pair_to_u8(1, 2)?,
+                self.hex_pair_to_u8(3, 4)?,
+                self.hex_pair_to_u8(5, 6)?,
+            ));
         }
 
         Err(ConversionError::InvalidInput)
